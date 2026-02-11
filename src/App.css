@@ -1,42 +1,729 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* All widget styles are scoped under .mw-builder — nothing leaks to the host page. */
+
+.mw-builder {
+  display: flex;
+  width: 100%;
+  /* Height defaults to full viewport. Host page can override with --mw-height:
+       [data-builder] { --mw-height: 700px; }                                  */
+  height: var(--mw-height, 100vh);
+  min-height: 400px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.mw-builder *,
+.mw-builder *::before,
+.mw-builder *::after {
+  box-sizing: border-box;
+}
+
+/* ── Viewport ──────────────────────────────────────────── */
+
+.mw-builder__viewport {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: #dde3ea;
+  position: relative;
+}
+
+/* ── Control panel ─────────────────────────────────────── */
+
+.mw-builder__panel {
+  width: 360px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;    /* wizard shell handles its own scroll */
+  background: #ffffff;
+  color: #1e293b;
+}
+
+.mw-panel {
+  padding: 16px;
+}
+
+.mw-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #334155;
+  color: #f8fafc;
+  letter-spacing: 0.01em;
+}
+
+.mw-panel__field {
+  margin-bottom: 18px;
+}
+
+.mw-panel__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mw-panel__value {
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.mw-panel__range {
+  width: 100%;
+  accent-color: #3b82f6;
+  cursor: pointer;
+  height: 4px;
+}
+
+.mw-panel__select {
+  width: 100%;
+  padding: 7px 10px;
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.mw-panel__select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
+.mw-panel__color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mw-panel__color {
+  width: 36px;
+  height: 28px;
+  padding: 2px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #0f172a;
+  cursor: pointer;
+}
+
+.mw-panel__color-hex {
+  font-size: 12px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.mw-panel__divider {
+  border: none;
+  border-top: 1px solid #334155;
+  margin: 18px 0;
+}
+
+/* ── Camera view buttons ───────────────────────────────── */
+/*
+  Compass layout (CSS grid):
+
+        [ Front ]
+  [Left]         [Right]
+        [ Back  ]
+*/
+
+.mw-view-nav {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    ". front"
+    "left right"
+    ". back";
+  gap: 5px;
+  pointer-events: none; /* let clicks pass through the grid gaps */
+}
+
+.mw-view-btn {
+  pointer-events: all;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 7px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.mw-view-btn:hover {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.mw-view-btn--active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.mw-view-btn--front { grid-area: front; }
+.mw-view-btn--left  { grid-area: left; }
+.mw-view-btn--right { grid-area: right; }
+.mw-view-btn--back  { grid-area: back; }
+
+/* ════════════════════════════════════════════════════════════
+   WIZARD SHELL
+   ════════════════════════════════════════════════════════════ */
+
+.mw-wizard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.mw-wizard__header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.mw-wizard__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+
+.mw-wizard__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.mw-wizard__step-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 12px 0 4px;
+}
+
+.mw-wizard__footer {
+  flex-shrink: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ── Step indicator ──────────────────────────────────────── */
+
+.mw-step-indicator {
+  display: flex;
+  gap: 2px;
+}
+
+.mw-step-indicator__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mw-step-indicator__dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mw-step-indicator__item--active .mw-step-indicator__dot {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.mw-step-indicator__item--done .mw-step-indicator__dot {
+  background: #22c55e;
+  color: #fff;
+}
+
+.mw-step-indicator__label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mw-step-indicator__item--active .mw-step-indicator__label {
+  color: #1e293b;
+}
+
+/* ── Wizard nav + pricing bar ────────────────────────────── */
+
+.mw-wizard__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.mw-wizard__nav-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.mw-wizard__nav-btn--prev {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.mw-wizard__nav-btn--next {
+  background: #f59e0b;
+  color: #fff;
+  margin-left: auto;
+}
+
+/* ── Pricing bar ─────────────────────────────────────────── */
+
+.mw-pricing-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  gap: 8px;
+}
+
+.mw-pricing-bar__amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mw-pricing-bar__total {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+}
+
+.mw-pricing-bar__deposit {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.mw-pricing-bar__actions {
+  display: flex;
+  gap: 5px;
+}
+
+.mw-pricing-bar__btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.mw-pricing-bar__btn--save { background: #e2e8f0; color: #475569; }
+.mw-pricing-bar__btn--buy  { background: #1e293b; color: #fff;    }
+.mw-pricing-bar__btn--cart { background: #f59e0b; color: #fff;    }
+
+/* ════════════════════════════════════════════════════════════
+   REUSABLE UI ATOMS
+   ════════════════════════════════════════════════════════════ */
+
+/* ── ButtonGroup ─────────────────────────────────────────── */
+
+.mw-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mw-btn-group__btn {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  text-align: center;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.mw-btn-group__btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.mw-btn-group__btn--active {
+  background: #1e293b;
+  color: #fff;
+  border-color: #1e293b;
+}
+
+/* ── ThumbnailPicker ─────────────────────────────────────── */
+
+.mw-thumb-picker {
+  display: grid;
+  gap: 5px;
+}
+
+.mw-thumb-picker__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 3px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.mw-thumb-picker__card:hover {
+  border-color: #94a3b8;
+}
+
+.mw-thumb-picker__card--active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.mw-thumb-picker__img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  display: block;
+}
+
+.mw-thumb-picker__label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.mw-thumb-picker__card--active .mw-thumb-picker__label {
+  color: #1e40af;
+}
+
+/* ── ColorSwatchPicker ───────────────────────────────────── */
+
+.mw-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.mw-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.mw-swatch:hover {
+  transform: scale(1.1);
+}
+
+.mw-swatch--active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3b82f6;
+  transform: scale(1.15);
+}
+
+/* ── DimensionInput ──────────────────────────────────────── */
+
+.mw-dim-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mw-dim-input__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mw-dim-input__row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mw-dim-input__field {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #fff;
+  font-family: inherit;
+}
+
+.mw-dim-input__field:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
+.mw-dim-input__unit {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── SectionAccordion ────────────────────────────────────── */
+
+.mw-accordion {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 0;
+}
+
+.mw-accordion__header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+
+.mw-accordion__header:hover {
+  color: #3b82f6;
+}
+
+.mw-accordion__chevron {
+  font-size: 18px;
+  color: #94a3b8;
+  display: inline-block;
+  transform: rotate(90deg);
+  transition: transform 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mw-accordion__chevron--open {
+  transform: rotate(-90deg);
+}
+
+.mw-accordion__body {
+  padding-top: 8px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   STEP 1 — Size & Style
+   ════════════════════════════════════════════════════════════ */
+
+.mw-step1__dims {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   STEP 3 — Doors & Windows
+   ════════════════════════════════════════════════════════════ */
+
+.mw-step3__summary-header {
+  padding: 8px 0 4px;
+}
+
+.mw-step3__summary-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.mw-step3__tabs {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.mw-step3__tab {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  text-align: center;
+  white-space: nowrap;
+  transition: color 0.1s;
+}
+
+.mw-step3__tab--active {
+  color: #1e293b;
+  border-bottom-color: #f59e0b;
+}
+
+.mw-step3__validation {
+  background: #fefce8;
+  border: 1px solid #fde047;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.mw-step3__validation p {
+  font-size: 11px;
+  color: #854d0e;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.mw-step3__fix-btn {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #1e293b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.mw-step3__fix-btn--secondary {
+  background: #475569;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.mw-step3__empty {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0 0 6px;
+  font-style: italic;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.mw-step3__door-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+  color: #1e293b;
 }
 
-.card {
-  padding: 2em;
+.mw-step3__remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
 }
 
-.read-the-docs {
-  color: #888;
+.mw-step3__add-door {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.mw-step3__add-door:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.mw-step3__add-door:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
