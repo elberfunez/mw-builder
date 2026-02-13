@@ -40,11 +40,10 @@ export default function BuilderScene({ config }) {
 
       <Canvas
         shadows
+        gl={{ alpha: true }}
         camera={{ position: [40, 28, 55], fov: 45, near: 0.1, far: 2000 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <color attach="background" args={['#dde3ea']} />
-
         <ambientLight intensity={0.5} />
         <directionalLight
           position={[60, 90, 40]}

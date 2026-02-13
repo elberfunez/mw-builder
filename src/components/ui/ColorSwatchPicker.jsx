@@ -9,6 +9,7 @@ export default function ColorSwatchPicker({ value, onChange, palette = COLOR_PAL
           className={`mw-swatch${value === c.key ? ' mw-swatch--active' : ''}`}
           style={{ background: c.hex }}
           title={c.label}
+          data-label={c.label}
           onClick={() => onChange(c.key)}
           type="button"
           aria-label={c.label}

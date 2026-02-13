@@ -54,13 +54,15 @@ export default function Step3DoorsWindows({ config, onUpdate }) {
       {/* Height validation banner */}
       {!heightOk && (
         <div className="mw-step3__validation">
-          <p>Your sides are currently {config.height}ft — they must be at least {MIN_HEIGHT}ft to add garage doors.</p>
+          <p>
+            Garage doors unlock at {MIN_HEIGHT}ft leg height. Your current build is {config.height}ft.
+          </p>
           <button
             className="mw-step3__fix-btn"
             onClick={() => onUpdate('height', MIN_HEIGHT)}
             type="button"
           >
-            Change height to {MIN_HEIGHT}ft to add garage doors
+            Auto-set leg height to {MIN_HEIGHT}ft
           </button>
           <button
             className="mw-step3__fix-btn mw-step3__fix-btn--secondary"
@@ -70,7 +72,7 @@ export default function Step3DoorsWindows({ config, onUpdate }) {
             }}
             type="button"
           >
-            Change to Open Sides Carport
+            Auto-correct height and enclose all sides
           </button>
         </div>
       )}
