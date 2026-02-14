@@ -3,6 +3,7 @@ import BuilderScene from './scene/BuilderScene'
 import WizardShell from './wizard/WizardShell'
 import StepIndicator from './wizard/StepIndicator'
 import PricingBar from './wizard/PricingBar'
+import AIAssistant from './ai/AIAssistant'
 
 const STEP_LABELS = ['Size & Style', 'Sides & Ends', 'Doors & Windows']
 
@@ -25,6 +26,10 @@ export default function BuilderLayout({ config, onUpdate }) {
           <aside className="mw-builder__panel">
             <WizardShell config={config} onUpdate={onUpdate} step={step} />
           </aside>
+        </div>
+
+        <div className="mw-builder__ai-dock">
+          <AIAssistant onUpdate={onUpdate} />
         </div>
 
         <footer className="mw-builder__powerbar">
