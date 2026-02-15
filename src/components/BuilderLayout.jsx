@@ -9,30 +9,31 @@ const STEP_LABELS = ['Size & Style', 'Sides & Ends', 'Doors & Windows']
 
 export default function BuilderLayout({ config, onUpdate }) {
   const [step, setStep] = useState(1)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   return (
     <div className="mw-builder">
+      {/* 3D viewport — always fills remaining space beside sidebar */}
       <div className="mw-builder__viewport">
         <BuilderScene config={config} />
       </div>
 
-      <div className="mw-builder__hud">
-        <header className="mw-builder__top-stepper">
-          <p className="mw-builder__kicker">Metal Workshop Builder</p>
+      {/* Sidebar: fixed on desktop/tablet, slide-up sheet on mobile */}
+      <aside className={`mw-builder__sidebar${panelOpen ? ' mw-builder__sidebar--open' : ''}`}>
+        <header className="mw-builder__sidebar-head">
+          <p className="mw-builder__kicker">Design Your Garage</p>
           <StepIndicator currentStep={step} onStepClick={setStep} />
         </header>
 
-        <div className="mw-builder__controls">
-          <aside className="mw-builder__panel">
-            <WizardShell config={config} onUpdate={onUpdate} step={step} />
-          </aside>
+        <div className="mw-builder__sidebar-body">
+          <WizardShell config={config} onUpdate={onUpdate} step={step} />
         </div>
 
-        <div className="mw-builder__ai-dock">
+        <div className="mw-builder__sidebar-ai">
           <AIAssistant onUpdate={onUpdate} />
         </div>
 
-        <footer className="mw-builder__powerbar">
+        <footer className="mw-builder__sidebar-footer">
           <PricingBar
             config={config}
             step={step}
@@ -41,7 +42,16 @@ export default function BuilderLayout({ config, onUpdate }) {
             nextLabel={step < 3 ? STEP_LABELS[step] : ''}
           />
         </footer>
-      </div>
+      </aside>
+
+      {/* Mobile FAB — only visible on small screens */}
+      <button
+        className="mw-builder__panel-toggle"
+        onClick={() => setPanelOpen(o => !o)}
+        aria-label={panelOpen ? 'Hide controls' : 'Show controls'}
+      >
+        {panelOpen ? '✕' : '☰ Configure'}
+      </button>
     </div>
   )
 }
